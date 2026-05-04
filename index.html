@@ -1153,6 +1153,34 @@
             border-color: var(--accent);
         }
 
+        .share-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.7rem;
+            color: #ccc;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .share-link:hover {
+            background: rgba(255,68,68,0.15);
+            color: #ff6666;
+        }
+        [data-theme="rebel"] .share-link:hover {
+            background: rgba(74,183,101,0.15);
+            color: #4ab765;
+        }
+        [data-theme="rebel"] #shareMenu {
+            border-color: rgba(74,183,101,0.4) !important;
+        }
+        [data-theme="rebel"] #shareMenu div:first-child {
+            color: #4ab765 !important;
+        }
+
         .theme-side {
             padding: 0.35rem 0.7rem;
             border-radius: 20px;
@@ -1435,6 +1463,31 @@
         </div>
 
         <div id="soundToggle" onclick="event.stopPropagation(); initAudio(); toggleSound();" title="Toggle sound effects" style="cursor:pointer; font-size:1.4rem; padding:0.3rem 0.6rem; border:1px solid rgba(255,255,255,0.15); border-radius:6px; background:rgba(0,0,0,0.3); margin-left:0.5rem; user-select:none; transition: opacity 0.3s;">🔊</div>
+
+        <div class="share-wrapper" style="position:relative; margin-left:0.5rem;">
+            <div id="shareBtn" onclick="event.stopPropagation(); toggleShareMenu();" title="Share this with the galaxy" style="cursor:pointer; font-size:1.4rem; padding:0.3rem 0.6rem; border:1px solid rgba(255,255,255,0.15); border-radius:6px; background:rgba(0,0,0,0.3); user-select:none; transition: opacity 0.3s;">📡</div>
+            <div id="shareMenu" style="display:none; position:absolute; top:110%; right:0; background:rgba(10,10,20,0.95); border:1px solid rgba(255,68,68,0.4); border-radius:10px; padding:0.5rem; min-width:200px; z-index:9999; backdrop-filter:blur(12px); box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+                <div style="padding:0.4rem 0.6rem; color:#ff4444; font-size:0.7rem; text-transform:uppercase; letter-spacing:2px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:0.3rem;">Transmit to Galaxy</div>
+                <a class="share-link" onclick="shareToX()" title="Share on X">
+                    <span style="font-size:1.1rem;">𝕏</span> X / Twitter
+                </a>
+                <a class="share-link" onclick="shareToLinkedIn()" title="Share on LinkedIn">
+                    <span>💼</span> LinkedIn
+                </a>
+                <a class="share-link" onclick="shareToBluesky()" title="Share on Bluesky">
+                    <span>🦋</span> Bluesky
+                </a>
+                <a class="share-link" onclick="shareToReddit()" title="Share on Reddit">
+                    <span>🤖</span> Reddit
+                </a>
+                <a class="share-link" onclick="shareToFacebook()" title="Share on Facebook">
+                    <span>👥</span> Facebook
+                </a>
+                <a class="share-link" onclick="copyShareLink()" title="Copy link">
+                    <span id="copyIcon">🔗</span> Copy Hyperspace Link
+                </a>
+            </div>
+        </div>
 
         <nav class="nav-links">
             <button class="nav-link" onclick="goHome()" id="navHome">🏠 Command</button>
@@ -3415,6 +3468,61 @@ function toggleSound() {
     if (soundMasterGain) soundMasterGain.gain.value = soundMuted ? 0 : 0.3;
     var btn = document.getElementById('soundToggle');
     if (btn) btn.textContent = soundMuted ? '🔇' : '🔊';
+}
+
+// ===== SHARE FUNCTIONS =====
+var SHARE_URL = 'https://softchris.github.io/gh-sw/';
+var SHARE_TITLE = 'Imperial GitHub — Star Wars themed GitHub browser';
+var SHARE_TEXT = 'May the 4th be with you! Check out this Star Wars-themed GitHub browser with 3D battle scenes, sound effects, and pilot dialogue. Choose the Empire or Rebel side! ⚡🌿';
+
+function toggleShareMenu() {
+    var menu = document.getElementById('shareMenu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('shareMenu');
+    var wrapper = e.target.closest('.share-wrapper');
+    if (!wrapper && menu) menu.style.display = 'none';
+});
+
+function shareToX() {
+    var text = encodeURIComponent(SHARE_TEXT + '\n' + SHARE_URL);
+    window.open('https://x.com/intent/tweet?text=' + text, '_blank', 'width=600,height=400');
+    toggleShareMenu();
+}
+
+function shareToLinkedIn() {
+    var url = encodeURIComponent(SHARE_URL);
+    window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + url, '_blank', 'width=600,height=500');
+    toggleShareMenu();
+}
+
+function shareToBluesky() {
+    var text = encodeURIComponent(SHARE_TEXT + '\n' + SHARE_URL);
+    window.open('https://bsky.app/intent/compose?text=' + text, '_blank', 'width=600,height=400');
+    toggleShareMenu();
+}
+
+function shareToReddit() {
+    var url = encodeURIComponent(SHARE_URL);
+    var title = encodeURIComponent(SHARE_TITLE);
+    window.open('https://www.reddit.com/submit?url=' + url + '&title=' + title, '_blank', 'width=800,height=600');
+    toggleShareMenu();
+}
+
+function shareToFacebook() {
+    var url = encodeURIComponent(SHARE_URL);
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank', 'width=600,height=400');
+    toggleShareMenu();
+}
+
+function copyShareLink() {
+    navigator.clipboard.writeText(SHARE_URL).then(function() {
+        var icon = document.getElementById('copyIcon');
+        icon.textContent = '✅';
+        setTimeout(function() { icon.textContent = '🔗'; }, 2000);
+    });
 }
 
 // Create white noise buffer
